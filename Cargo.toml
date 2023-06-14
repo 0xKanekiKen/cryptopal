@@ -1,0 +1,24 @@
+[workspace]
+
+members = [
+  "set1",
+]
+
+[workspace.package]
+version = "0.1.0"
+rust-version = "1.67"
+authors = ["Kaneki Ken"]
+description = "A solution to cryptopal challenges in Rust"
+repository = "https://github.com/0xKanekiKen/cryptopal"
+homepage = "https://github.com/0xKanekiKen/cryptopal"
+documentation = "https://github.com/0xKanekiKen/cryptopal"
+categories = ["cryptography"]
+keywords = ["cryptopals", "cryptography"]
+license = "MIT"
+readme = "README.md"
+edition = "2021"
+publish = false
+
+[profile.release]
+opt-level = 3
+lto = false
