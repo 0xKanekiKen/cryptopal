@@ -1,8 +1,19 @@
+use set1::chal1::hex_to_bytes;
 use std::collections::HashMap;
 
-use set1::chal1::hex_to_bytes;
-
+/// This function returns a matrix of the frequency of each character in the
+/// English language. The matrix is indexed by the XOR of two characters.
+/// For example, the value at index [0][0] is the frequency of the character
+/// 'a' XOR 'a', which is 0. The value at index [0][1] is the frequency of the
+/// character 'a' XOR 'b', which is 0.01492. The value at index [1][0] is the
+/// frequency of the character 'b' XOR 'a', which is 0.01492. The value at
+/// index [1][1] is the frequency of the character 'b' XOR 'b', which is 0.
+///
+/// The matrix is used to score the likelihood that a given byte is the key
+/// used to encrypt a message. The higher the score, the more likely that the
+/// byte is the key.
 fn get_char_freq_matrix() -> [[f64; 256]; 256] {
+    // The frequency of each character in the English language.
     let mut char_freq = HashMap::new();
 
     char_freq.insert(b'a', 0.08167);
@@ -35,6 +46,7 @@ fn get_char_freq_matrix() -> [[f64; 256]; 256] {
 
     let mut char_freq_matrix = [[0.0; 256]; 256];
 
+    // Iterate over the frequencies and populate the matrix.
     char_freq.iter().enumerate().for_each(|(_, (k, v))| {
         char_freq_matrix
             .iter_mut()
@@ -47,8 +59,13 @@ fn get_char_freq_matrix() -> [[f64; 256]; 256] {
     char_freq_matrix
 }
 
+/// This function returns an array of the frequency of each character in the
+/// cipher. The array is indexed by the byte value of the character.
 fn compute_freq_in_cipher(cipher: &str) -> [f64; 256] {
+    // Convert the cipher from a hex string to a byte array.
     let cipher_in_bytes = hex_to_bytes(cipher).unwrap();
+
+    // An array to hold the frequency of each character in the cipher.
     let mut char_counter = [0.0; 256];
     let size = cipher_in_bytes.len() as f64;
 
@@ -60,10 +77,12 @@ fn compute_freq_in_cipher(cipher: &str) -> [f64; 256] {
     char_counter
 }
 
+/// This function returns the dot product of two arrays.
 fn dot_product(a: &[f64; 256], b: &[f64; 256]) -> f64 {
     a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
 }
 
+/// This function returns an array of scores for each byte in the cipher.
 fn get_scores(cipher: &str) -> [f64; 256] {
     let char_freq_matrix = get_char_freq_matrix();
     let cipher_freq = compute_freq_in_cipher(cipher);
@@ -80,8 +99,9 @@ fn main() {
     let cipher = "1b37373331363f78151b7f2b783431333d78397828372d363c\
                   78373e783a393b3736";
     let cipher_bytes = hex_to_bytes(cipher).unwrap();
-
     let scores = get_scores(cipher);
+
+    // Find the index of the highest score and the highest score.
     let mut max_score = 0.0;
     let mut max_score_index = 0;
     scores.iter().enumerate().for_each(|(i, score)| {
@@ -93,6 +113,7 @@ fn main() {
 
     println!("Key: {}", max_score_index as u8);
 
+    // Decrypt the cipher.
     let decrypted_bytes: Vec<u8> = cipher_bytes
         .iter()
         .map(|x| x ^ max_score_index as u8)
