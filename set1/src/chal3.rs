@@ -83,7 +83,7 @@ fn dot_product(a: &[f64; 256], b: &[f64; 256]) -> f64 {
 }
 
 /// This function returns an array of scores for each byte in the cipher.
-fn get_scores(cipher: &str) -> [f64; 256] {
+pub(crate) fn get_scores(cipher: &str) -> [f64; 256] {
     let char_freq_matrix = get_char_freq_matrix();
     let cipher_freq = compute_freq_in_cipher(cipher);
     let mut scores = [0.0; 256];
