@@ -3,7 +3,7 @@ use std::fs;
 
 pub fn detect_single_char_xor() {
     // read the file line by line.
-    let cipher_reader = fs::read_to_string("set1/4.txt").unwrap();
+    let cipher_reader = fs::read_to_string("set1/data/chal4/4.txt").unwrap();
 
     // Find the line with the highest score. The line with the highest score is
     // the line that is most likely to be encrypted with a single character.
@@ -43,5 +43,5 @@ pub fn detect_single_char_xor() {
     );
 
     // save the decrypted text to a file.
-    fs::write("set1/4_decrypted.txt", decrypted_bytes).unwrap();
+    fs::write("set1/data/chal4/4_decrypted.txt", decrypted_bytes).unwrap();
 }
