@@ -61,17 +61,14 @@ fn get_char_freq_matrix() -> [[f64; 256]; 256] {
 
 /// This function returns an array of the frequency of each character in the
 /// cipher. The array is indexed by the byte value of the character.
-fn compute_freq_in_cipher(cipher: &str) -> [f64; 256] {
-    // Convert the cipher from a hex string to a byte array.
-    let cipher_in_bytes = hex_to_bytes(cipher).unwrap();
-
+fn compute_freq_in_cipher(cipher: &Vec<u8>) -> [f64; 256] {
     // An array to hold the frequency of each character in the cipher.
     let mut char_counter = [0.0; 256];
-    let size = cipher_in_bytes.len() as f64;
+    let size = cipher.len() as f64;
 
     // iterate over the bytes and count the number of times each byte appears.
-    for byte in cipher_in_bytes {
-        char_counter[byte as usize] += 1.0 / size;
+    for byte in cipher {
+        char_counter[*byte as usize] += 1.0 / size;
     }
 
     char_counter
@@ -83,7 +80,7 @@ fn dot_product(a: &[f64; 256], b: &[f64; 256]) -> f64 {
 }
 
 /// This function returns an array of scores for each byte in the cipher.
-pub(crate) fn get_scores(cipher: &str) -> [f64; 256] {
+pub(crate) fn get_scores(cipher: &Vec<u8>) -> [f64; 256] {
     let char_freq_matrix = get_char_freq_matrix();
     let cipher_freq = compute_freq_in_cipher(cipher);
     let mut scores = [0.0; 256];
@@ -99,7 +96,7 @@ pub fn single_byte_xor_character() {
     let cipher = "1b37373331363f78151b7f2b783431333d78397828372d363c\
                   78373e783a393b3736";
     let cipher_bytes = hex_to_bytes(cipher).unwrap();
-    let scores = get_scores(cipher);
+    let scores = get_scores(&cipher_bytes);
 
     // Find the index of the highest score and the highest score.
     let mut max_score = 0.0;

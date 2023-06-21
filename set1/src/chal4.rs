@@ -13,8 +13,9 @@ pub fn detect_single_char_xor() {
     let mut xor_with = 0;
     let mut encrypted_text = String::new();
     cipher_reader.lines().for_each(|cipher| {
+        let cipher_bytes = hex_to_bytes(cipher).unwrap();
         // Get the scores for each byte in the cipher.
-        let cipher_score = get_scores(cipher);
+        let cipher_score = get_scores(&cipher_bytes);
 
         // Find the index of the highest score and the highest score if any.
         cipher_score.iter().enumerate().for_each(|(i, score)| {
