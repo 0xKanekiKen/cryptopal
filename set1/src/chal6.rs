@@ -1,7 +1,7 @@
 use crate::{chal1::hex_to_bytes, chal3::get_scores, chal5::repeating_key_xor};
 use std::{collections::HashMap, fs};
 
-fn base64_to_bytes(cipher: &str) -> Result<Vec<u8>, &str> {
+pub(crate) fn base64_to_bytes(cipher: &str) -> Result<Vec<u8>, &str> {
     // the length of the cipher should be divisible by 4.
     if cipher.len() % 4 != 0 {
         return Err("Invalid base64 string, it should be divisible by 4");
