@@ -219,4 +219,22 @@ mod test {
             Err("Invalid base64 string, it should be divisible by 4")
         );
     }
+
+    #[test]
+    fn test_edit_distance() {
+        //------------------------- equal length strings -------------------------
+        let s1 = "this is a test";
+        let s2 = "wokka wokka!!!";
+        let expected_distance = 37;
+        let result = edit_distance(s1.as_bytes(), s2.as_bytes()).unwrap();
+
+        assert_eq!(result, expected_distance);
+
+        //------------------------- unequal length strings -------------------------
+        let s1 = "this is a test";
+        let s2 = "wokka wokka!!";
+        let result = edit_distance(s1.as_bytes(), s2.as_bytes());
+
+        assert_eq!(result, Err("Strings are of different lengths"));
+    }
 }
