@@ -148,3 +148,56 @@ fn base64_to_bytes(cipher: &str) -> Result<Vec<u8>, &str> {
 
     Ok(cipher_bytes)
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_base64_to_bytes() {
+        //------------------------- no `=` padding in the last chunk -------------------------
+        let base64_string = "SGVsbG8gV29ybGQh";
+        let expected_bytes = vec![
+            0b01001000, 0b01100101, 0b01101100, 0b01101100, 0b01101111, 0b00100000, 0b01010111,
+            0b01101111, 0b01110010, 0b01101100, 0b01100100, 0b00100001,
+        ];
+
+        let result = base64_to_bytes(base64_string).unwrap();
+
+        assert_eq!(result, expected_bytes);
+
+        //------------------------- one `=` padding in the last chunk -------------------------
+
+        let base64_string = "SGVsbG8gV29ybGQ=";
+        let expected_bytes = vec![
+            0b01001000, 0b01100101, 0b01101100, 0b01101100, 0b01101111, 0b00100000, 0b01010111,
+            0b01101111, 0b01110010, 0b01101100, 0b01100100,
+        ];
+
+        let result = base64_to_bytes(base64_string).unwrap();
+
+        assert_eq!(result, expected_bytes);
+
+        //------------------------- two `=` padding in the last chunk -------------------------
+
+        let base64_string = "SGVsbG8gV29ybG==";
+        let expected_bytes = vec![
+            0b01001000, 0b01100101, 0b01101100, 0b01101100, 0b01101111, 0b00100000, 0b01010111,
+            0b01101111, 0b01110010, 0b01101100,
+        ];
+
+        let result = base64_to_bytes(base64_string).unwrap();
+
+        assert_eq!(result, expected_bytes);
+
+        //------------------------- invalid base64 string -------------------------
+
+        let base64_string = "SGVsbG8gV29ybG";
+        let result = base64_to_bytes(base64_string);
+
+        assert_eq!(
+            result,
+            Err("Invalid base64 string, it should be divisible by 4")
+        );
+    }
+}
