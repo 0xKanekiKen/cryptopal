@@ -149,6 +149,25 @@ fn base64_to_bytes(cipher: &str) -> Result<Vec<u8>, &str> {
     Ok(cipher_bytes)
 }
 
+fn edit_distance<'a>(s1: &[u8], s2: &[u8]) -> Result<u32, &'a str> {
+    // if the strings are of different lengths, then return an error.
+    if s1.len() != s2.len() {
+        return Err("Strings are of different lengths");
+    };
+
+    let mut distance = 0;
+
+    s1.iter()
+        .zip(s2.iter())
+        .enumerate()
+        .for_each(|(_, (c1, c2))| {
+            let xor = c1 ^ c2;
+            distance += xor.count_ones();
+        });
+
+    Ok(distance)
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
