@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use crate::{chal1::hex_to_bytes, chal3::get_scores, chal5::repeating_key_xor};
+use std::{collections::HashMap, fs};
 
 fn base64_to_bytes(cipher: &str) -> Result<Vec<u8>, &str> {
     // the length of the cipher should be divisible by 4.
@@ -149,23 +150,55 @@ fn base64_to_bytes(cipher: &str) -> Result<Vec<u8>, &str> {
     Ok(cipher_bytes)
 }
 
-fn edit_distance<'a>(s1: &[u8], s2: &[u8]) -> Result<u32, &'a str> {
+fn edit_distance<'a>(s1: &[u8], s2: &[u8]) -> Result<usize, &'a str> {
     // if the strings are of different lengths, then return an error.
     if s1.len() != s2.len() {
         return Err("Strings are of different lengths");
     };
 
-    let mut distance = 0;
+    let mut distance: usize = 0;
 
     s1.iter()
         .zip(s2.iter())
         .enumerate()
         .for_each(|(_, (c1, c2))| {
             let xor = c1 ^ c2;
-            distance += xor.count_ones();
+            distance += xor.count_ones() as usize;
         });
 
     Ok(distance)
+}
+
+fn keysize_score(cipher: &[u8], max_keysize: usize) -> Result<Vec<f64>, &str> {
+    let mut scores: Vec<f64> = Vec::new();
+    for size in 1..max_keysize {
+        // dividing the cipher into chunks of size `size`.
+        let first_chunk = &cipher[0..size];
+        let second_chunk = &cipher[size..size * 2];
+        let third_chunk = &cipher[size * 2..size * 3];
+        let fourth_chunk = &cipher[size * 3..size * 4];
+
+        // calculating the edit distance between the chunks.
+        let result_first_second = edit_distance(first_chunk, second_chunk).unwrap() as f64;
+        let result_second_third = edit_distance(second_chunk, third_chunk).unwrap() as f64;
+        let result_third_fourth = edit_distance(third_chunk, fourth_chunk).unwrap() as f64;
+        let result_fourth_first = edit_distance(fourth_chunk, first_chunk).unwrap() as f64;
+        let result_first_third = edit_distance(first_chunk, third_chunk).unwrap() as f64;
+        let result_second_fourth = edit_distance(second_chunk, fourth_chunk).unwrap() as f64;
+
+        // calculating the average edit distance.
+        let result: f64 = (result_first_second
+            + result_second_third
+            + result_third_fourth
+            + result_fourth_first
+            + result_first_third
+            + result_second_fourth)
+            / (6.0 * size as f64);
+
+        // pushing the average edit distance to the scores vector.
+        scores.push(result);
+    }
+    Ok(scores)
 }
 
 #[cfg(test)]
