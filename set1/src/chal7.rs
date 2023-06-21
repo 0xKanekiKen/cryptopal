@@ -2,6 +2,8 @@ use crate::chal6::base64_to_bytes;
 use openssl::symm::{decrypt, Cipher};
 use std::fs;
 
+/// This function decrypts the ciphertext in set1/data/chal7/7.txt using AES in ECB mode.
+/// The key is "YELLOW SUBMARINE". The decrypted text is saved to set1/data/chal7/7_decryption.txt.
 pub fn aes_in_ecb_mode() {
     // read the file.
     let cipher: String = fs::read_to_string("set1/data/chal7/7.txt")
