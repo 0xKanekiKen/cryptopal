@@ -201,6 +201,100 @@ fn keysize_score(cipher: &[u8], max_keysize: usize) -> Result<Vec<f64>, &str> {
     Ok(scores)
 }
 
+fn transpose_cipher_into_matrix(cipher: &[u8], keysize: usize) -> Vec<Vec<u8>> {
+    let mut matrix = vec![vec![]; keysize];
+
+    // transposing the cipher into a matrix.
+    for (i, byte) in cipher.iter().enumerate() {
+        matrix[i % keysize].push(*byte);
+    }
+
+    matrix
+}
+
+pub fn find_key(cipher: &str, max_keysize: usize) -> Vec<Vec<u8>> {
+    let mut top_keys = vec![];
+    let cipher_bytes = base64_to_bytes(cipher).unwrap();
+    let mut score_per_key = keysize_score(&cipher_bytes, max_keysize).unwrap();
+
+    // Returns the index of bottom scores.
+    let mut keysize: Vec<usize> = Vec::with_capacity(1);
+    for _ in 0..1 {
+        let mut min_score = f64::MAX;
+        let mut index = 0;
+        score_per_key.iter().enumerate().for_each(|(i, score)| {
+            if *score < min_score {
+                min_score = *score;
+                index = i;
+            }
+        });
+        keysize.push(index + 1);
+        score_per_key[index] = f64::MAX;
+    }
+
+    for size in keysize {
+        let transpose_matrix = transpose_cipher_into_matrix(&cipher_bytes, size);
+
+        let mut keys: Vec<u8> = Vec::with_capacity(size);
+        for rows in transpose_matrix {
+            let scores = get_scores(&rows);
+
+            // Find the index of the highest score and the highest score.
+            let mut max_score = 0.0;
+            let mut key = 0;
+            scores.iter().enumerate().for_each(|(i, score)| {
+                if *score > max_score {
+                    max_score = *score;
+                    key = i;
+                }
+            });
+            keys.push(key as u8);
+        }
+        top_keys.push(keys)
+    }
+
+    top_keys
+}
+
+pub fn break_repeating_key_xor() {
+    let cipher: String = fs::read_to_string("set1/data/chal6/6.txt")
+        .unwrap()
+        .parse::<String>()
+        .unwrap();
+
+    // replace the newline characters with empty strings.
+    let cipher = cipher.replace("\n", "");
+
+    // cipher is in base64 format, so we need to convert it into bytes.
+    let cipher_bytes = base64_to_bytes(&cipher).unwrap();
+
+    // find the key. the keys are sorted in descending order of their scores.
+    let keys = find_key(&cipher, 40);
+    let mut decrypted_bytes: Vec<u8> = Vec::new();
+
+    for key in keys {
+        println!("Key: {}", String::from_utf8(key.clone()).unwrap());
+        println!("Key length: {}", key.len());
+
+        let hex_decrypted = repeating_key_xor(
+            &String::from_utf8(cipher_bytes.clone()).unwrap(),
+            &String::from_utf8(key).unwrap(),
+        );
+        let decrypted_text_bytes = hex_to_bytes(&hex_decrypted).unwrap();
+
+        // printing the plaintext by converting hex string into ascii.
+        println!(
+            "Decrypted text: {}",
+            String::from_utf8(decrypted_text_bytes.clone()).unwrap()
+        );
+
+        decrypted_bytes = decrypted_text_bytes;
+    }
+
+    // save the decrypted text to a file.
+    fs::write("set1/data/chal6/6_decrypted.txt", &decrypted_bytes).unwrap();
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
