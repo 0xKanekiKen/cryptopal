@@ -2,6 +2,7 @@
 
 members = [
   "set1",
+  "set2",
 ]
 
 [workspace.package]
